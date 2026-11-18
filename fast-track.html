@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>PawSchool Fast Track</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one-time-offer upsell, single 680px column; progress strip on top, dark "accelerator" hero band, offer box, decline link */
+:root{
+  --bg:#ffffff; --paper:#f4f7f3; --fg:#14211a; --muted:#56675c; --line:#d6e0d5;
+  --night:#0f2a20; --night-ink:#f2f7f3; --ball:#e6eb3c; --ball-ink:#1b220d; --red:#c2361f; --field:#1f5c45;
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1612; --paper:#15201a; --fg:#e8f0ea; --muted:#9fb1a5; --line:#2a3a30;
+  --night:#0a1d16; --night-ink:#f2f7f3; --ball:#e0e553; --ball-ink:#1b220d; --red:#f07a62; --field:#6fd0a2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1612; --paper:#15201a; --fg:#e8f0ea; --muted:#9fb1a5; --line:#2a3a30;
+  --night:#0a1d16; --night-ink:#f2f7f3; --ball:#e0e553; --ball-ink:#1b220d; --red:#f07a62; --field:#6fd0a2; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:19px;line-height:1.65}
+.col{max-width:680px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.015em}
+p{margin:0}
+mark{background:var(--ball);color:var(--ball-ink);padding:0 .15em}
+
+.steps{background:var(--paper);border-bottom:1px solid var(--line);font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.steps .col{display:flex;gap:8px;padding-block:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.steps span{color:var(--muted)}
+.steps .on{color:var(--red)}
+.steps .ok{color:var(--field)}
+.hero{background:var(--night);color:var(--night-ink)}
+.hero .col{padding-block:44px 52px;display:flex;flex-direction:column;gap:20px;text-align:center;align-items:center}
+.wait{background:var(--red);color:#fff;font-weight:800;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px}
+.hero h1{font-size:clamp(2rem,6.5vw,3.2rem);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--ball)}
+.hero p{font-size:1.08rem;opacity:.9;max-width:38ch}
+
+.letter{display:flex;flex-direction:column;gap:22px;padding-block:44px}
+.letter h2{font-size:clamp(1.55rem,5vw,2rem);font-weight:800;margin-top:12px}
+.weeks{display:flex;flex-direction:column;gap:12px}
+.wk{display:grid;grid-template-columns:72px 1fr;gap:16px;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.wk b{font-family:var(--f-display);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column}
+.wk b big{font-size:2rem;color:var(--fg);letter-spacing:0;line-height:1}
+.wk h3{font-size:1.15rem;margin-bottom:4px}
+.wk p{font-size:.98rem;color:var(--muted)}
+.vlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.vlist li{display:flex;gap:12px}
+.vlist li::before{content:"✓";flex:none;font-weight:800;color:var(--field)}
+
+.offer{background:var(--paper);border:3px solid var(--fg);border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+.tag{font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.old{text-decoration:line-through;color:var(--muted);font-weight:700}
+.price{font-family:var(--f-display);font-weight:800;font-size:4.2rem;line-height:1}
+.price sup{font-size:.45em}
+.offer ul{text-align:left;align-self:stretch}
+.cta{display:inline-flex;flex-direction:column;align-items:center;gap:2px;background:var(--ball);color:var(--ball-ink);text-decoration:none;border-radius:14px;padding:18px 28px;font-family:var(--f-display);font-weight:800;font-size:1.3rem;box-shadow:0 6px 0 color-mix(in srgb,var(--ball) 50%,#000);transition:transform .08s,box-shadow .08s;max-width:100%;text-align:center}
+.cta small{font-family:var(--f-body);font-weight:600;font-size:.78rem;opacity:.75}
+.cta:hover{transform:translateY(2px);box-shadow:0 4px 0 color-mix(in srgb,var(--ball) 50%,#000)}
+.cta:focus-visible,.no:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+.no{color:var(--muted);font-size:.92rem;text-decoration:underline;text-underline-offset:3px}
+.note{font-size:.85rem;color:var(--muted)}
+footer{text-align:center;font-size:.8rem;color:var(--muted)}
+footer .col{padding-block:24px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.legal{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:.9rem}
+.legal a{color:var(--fg);font-weight:700}
+.guarantee{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;border:2px solid var(--fg);border-radius:18px;padding:22px}
+.seal{width:108px;height:108px;border-radius:50%;background:var(--night);color:var(--night-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:var(--f-display);font-weight:800;line-height:1;outline:3px dashed var(--field);outline-offset:4px;flex:none}
+.seal big{font-size:2.4rem;color:var(--ball)}
+.seal small{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;max-width:9ch}
+.guarantee div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.guarantee h2{margin-top:0;font-size:1.45rem}
+.guarantee p{font-size:1rem}
+.guarantee a{color:inherit;font-weight:700}
+@media (max-width:520px){.guarantee{grid-template-columns:1fr;justify-items:center;text-align:center}}
+@media (max-width:480px){.wk{grid-template-columns:1fr;gap:6px}.wk b{flex-direction:row;gap:8px;align-items:baseline}.wk b big{font-size:1.4rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="steps"><div class="col"><span class="ok">✓ Order received</span><span>›</span><span class="on">Step 2: Special offer</span><span>›</span><span>Access</span></div></div>
+
+<header class="hero"><div class="col">
+  <span class="wait">Wait! Your order isn't complete yet</span>
+  <h1>Get Results in <em>30 Days</em> Instead of Figuring It Out Alone</h1>
+  <p>You just got the lessons. Now get the exact day-by-day plan that tells you which lesson to train, how many reps, and when to move on.</p>
+</div></header>
+
+<main class="col letter">
+  <p>Congratulations, your PawSchool access is on the way.</p>
+  <p>But here's what happens to most people who buy a training course: they do two lessons, get busy, skip a few days, and three weeks later the dog is still jumping on guests.</p>
+  <p><strong>Not because the lessons don't work. Because nobody told them what to do on Day 4.</strong></p>
+  <p>That's why we built <mark>PawSchool Fast Track</mark>, and it's only offered on this page.</p>
+
+  <h2>What is Fast Track?</h2>
+  <p>A 30-day accelerator plan that takes the 16 lessons and puts them in the fastest order for your pet. Every day you get one clear mission, the exact number of reps, and a checkpoint that tells you whether to move forward or repeat.</p>
+  <p>No guessing. No "what do I train today?" Just open it and do today's mission.</p>
+
+  <h2>Your 30-day roadmap</h2>
+  <div class="weeks">
+    <div class="wk"><b>Week<big>1</big></b><div><h3>Attention &amp; Foundations</h3><p>Name, Sit and the clicker. You build the focus every other skill depends on.</p></div></div>
+    <div class="wk"><b>Week<big>2</big></b><div><h3>Calm Control</h3><p>Down, Stay and polite greetings. The jumping and door-dashing start to disappear.</p></div></div>
+    <div class="wk"><b>Week<big>3</big></b><div><h3>Real World</h3><p>Recall on a long line and loose leash walking outside, with distraction levels that go up step by step.</p></div></div>
+    <div class="wk"><b>Week<big>4</big></b><div><h3>Lock It In</h3><p>Barking, alone time and proofing every cue in new places so the results stick for good.</p></div></div>
+  </div>
+
+  <h2>Fast Track also includes</h2>
+  <ul class="vlist">
+    <li><span><strong>Daily mission cards.</strong> One 5–15 minute task per day with exact reps and success criteria.</span></li>
+    <li><span><strong>Weekly checkpoints.</strong> A simple test at the end of each week so you know you're on track.</span></li>
+    <li><span><strong>"Stuck?" troubleshooting guide.</strong> What to do when your pet won't sit, breaks the stay, or ignores recall.</span></li>
+    <li><span><strong>High-value treat guide.</strong> Which rewards to use for easy lessons and which to save for hard ones.</span></li>
+    <li><span><strong>Cat track option.</strong> A separate 30-day plan for cat owners.</span></li>
+  </ul>
+
+  <p>Think about it: you already decided your pet deserves training. Fast Track is the difference between <em>owning</em> a course and <strong>finishing</strong> it.</p>
+
+  <section class="guarantee" aria-labelledby="g-title">
+    <span class="seal"><big>60</big><small>Day money-back</small></span>
+    <div>
+      <h2 id="g-title">Same 60-Day Money-Back Guarantee</h2>
+      <p>Fast Track has its own 60-day money-back guarantee. Follow the plan, and if you're not happy for any reason, contact our support team within 60 days of purchase for a full refund. Your PawSchool access stays untouched.</p>
+      <p>Details are in our <a href="terms.html">Terms of Service</a>.</p>
+    </div>
+  </section>
+
+  <div class="offer" id="order">
+    <span class="tag">One-time offer · only on this page</span>
+    <span class="old">Regular price: $67</span>
+    <span class="price"><sup>$</sup>37</span>
+    <ul class="vlist">
+      <li>30-day day-by-day training plan (dog &amp; cat tracks)</li>
+      <li>30 daily mission cards with reps and goals</li>
+      <li>4 weekly checkpoints</li>
+      <li>"Stuck?" troubleshooting guide</li>
+      <li>High-value treat guide</li>
+    </ul>
+    <a class="cta buy" href="#order">Yes! Add Fast Track to My Order<small>$37 · One-time payment</small></a>
+    <a class="no decline" href="#order">No thanks, I'll figure out the order of lessons on my own</a>
+    <p class="note">Protected by our 60-day money-back guarantee. This offer is not shown again after you leave this page.</p>
+  </div>
+</main>
+
+<footer><div class="col">
+  <nav class="legal" aria-label="Legal"><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="privacy.html#unsubscribe">Unsubscribe</a></nav>
+  <p>© 2026 PawSchool · Reward-based training for dogs and cats. Educational content, not a substitute for veterinary advice.</p>
+</div></footer>
+
+<script>
+// Paste your links here to activate the buttons.
+const UPSELL_CHECKOUT_URL = ""; // checkout / one-click upsell link
+const DECLINE_URL = "";         // where "No thanks" goes (downsell or thank-you page)
+const set = (sel, url) => url && document.querySelectorAll(sel).forEach(a => { a.href = url; });
+set(".buy", UPSELL_CHECKOUT_URL);
+set(".decline", DECLINE_URL);
+</script>
+</html>

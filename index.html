@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>PawSchool Access Offer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: long-form sales letter, single 680px column, full-width colored bands for the hero, price box and final CTA */
+:root{
+  --bg:#ffffff; --paper:#f4f7f3; --fg:#14211a; --muted:#56675c; --line:#d6e0d5;
+  --field:#1f5c45; --field-ink:#ffffff; --ball:#e6eb3c; --ball-ink:#1b220d; --red:#c2361f;
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1612; --paper:#15201a; --fg:#e8f0ea; --muted:#9fb1a5; --line:#2a3a30;
+  --field:#123b2c; --field-ink:#f2f7f3; --ball:#e0e553; --ball-ink:#1b220d; --red:#f07a62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1612; --paper:#15201a; --fg:#e8f0ea; --muted:#9fb1a5; --line:#2a3a30;
+  --field:#123b2c; --field-ink:#f2f7f3; --ball:#e0e553; --ball-ink:#1b220d; --red:#f07a62; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:19px;line-height:1.65}
+.col{max-width:680px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.015em}
+p{margin:0}
+.letter{display:flex;flex-direction:column;gap:22px;padding-block:48px}
+mark{background:var(--ball);color:var(--ball-ink);padding:0 .15em}
+strong{font-weight:800}
+.red{color:var(--red);font-weight:800}
+
+.alert{background:var(--red);color:#fff;text-align:center;font-weight:800;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase}
+.alert .col{padding-block:10px}
+.hero{background:var(--field);color:var(--field-ink)}
+.hero .col{padding-block:52px 56px;display:flex;flex-direction:column;gap:22px;text-align:center;align-items:center}
+.pre{font-weight:800;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ball)}
+.hero h1{font-size:clamp(2.1rem,7vw,3.4rem);font-weight:800}
+.hero h1 u{text-decoration-color:var(--ball);text-decoration-thickness:6px;text-underline-offset:6px}
+.hero p{font-size:1.1rem;opacity:.92;max-width:34ch}
+
+.cta{display:inline-flex;flex-direction:column;align-items:center;gap:2px;background:var(--ball);color:var(--ball-ink);text-decoration:none;border:0;border-radius:14px;padding:18px 28px;font-family:var(--f-display);font-weight:800;font-size:1.3rem;box-shadow:0 6px 0 color-mix(in srgb,var(--ball) 50%,#000);transition:transform .08s,box-shadow .08s;cursor:pointer;max-width:100%;text-align:center}
+.cta small{font-family:var(--f-body);font-weight:600;font-size:.78rem;opacity:.75}
+.cta:hover{transform:translateY(2px);box-shadow:0 4px 0 color-mix(in srgb,var(--ball) 50%,#000)}
+.cta:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+
+.letter h2{font-size:clamp(1.6rem,5vw,2.1rem);font-weight:800;margin-top:14px}
+.xlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.xlist li{display:flex;gap:12px}
+.xlist li::before{content:"✕";flex:none;color:var(--red);font-weight:800}
+.vlist li::before{content:"✓";color:var(--field)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .vlist li::before{color:var(--ball)}}
+:root[data-theme="dark"] .vlist li::before{color:var(--ball)}
+
+.modules{display:flex;flex-direction:column;gap:14px}
+.mod{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.mod h3{font-size:1.2rem}
+.mod span{font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mod p{font-size:1rem;color:var(--muted)}
+
+.compare{border-collapse:collapse;width:100%;font-size:1rem}
+.compare td{padding:12px 4px;border-bottom:1px solid var(--line)}
+.compare td:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.compare tr.win td{color:var(--field);font-size:1.15rem;border-bottom:0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .compare tr.win td{color:var(--ball)}}
+:root[data-theme="dark"] .compare tr.win td{color:var(--ball)}
+
+.offer{background:var(--paper);border:3px dashed var(--fg);border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+.offer .old{text-decoration:line-through;color:var(--muted);font-weight:700}
+.offer .price{font-family:var(--f-display);font-weight:800;font-size:4.2rem;line-height:1}
+.offer .price sup{font-size:.45em}
+.offer ul{text-align:left;align-self:stretch}
+.note{font-size:.85rem;color:var(--muted)}
+.faq{display:flex;flex-direction:column;gap:10px}
+details{border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:var(--paper)}
+summary{font-weight:800;cursor:pointer}
+details p{margin-top:10px;font-size:1rem;color:var(--muted)}
+.final{background:var(--field);color:var(--field-ink)}
+.final .col{padding-block:52px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center}
+.final h2{font-size:clamp(1.7rem,5vw,2.3rem)}
+.ps{font-size:1rem}
+footer{text-align:center;font-size:.8rem;color:var(--muted)}
+footer .col{padding-block:24px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.legal{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:.9rem}
+.legal a{color:var(--fg);font-weight:700}
+.guarantee{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;border:2px solid var(--fg);border-radius:18px;padding:24px}
+.seal{width:118px;height:118px;border-radius:50%;background:var(--field);color:var(--field-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:var(--f-display);font-weight:800;line-height:1;outline:3px dashed var(--field);outline-offset:4px;flex:none}
+.seal big{font-size:2.6rem}
+.seal small{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;max-width:9ch}
+.guarantee div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.guarantee h2{margin-top:0}
+.guarantee a{color:inherit;font-weight:700}
+.gline{font-weight:700;font-size:.92rem}
+@media (max-width:520px){.guarantee{grid-template-columns:1fr;justify-items:center;text-align:center}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="alert"><div class="col">Warning: read this before your dog chews another shoe</div></div>
+
+<header class="hero"><div class="col">
+  <span class="pre">For dog &amp; cat owners who are done being ignored</span>
+  <h1>Your Pet Isn't "Stubborn." <u>Nobody Taught Them.</u></h1>
+  <p>16 step-by-step lessons that turn a chaotic pet into a calm, listening companion. In 5 minutes a day. For $27, once.</p>
+  <a class="cta" href="#order">Get Instant Access, $27<small>One payment · Lifetime access</small></a>
+  <p class="gline">Backed by our 60-day money-back guarantee</p>
+</div></header>
+
+<main class="col letter">
+  <p>Let me be blunt.</p>
+  <p>If your dog pulls you down the street, jumps on every guest, barks at every leaf, and pretends to be deaf the second you say "come"... <strong>that's not a bad dog.</strong></p>
+  <p>That's a dog nobody ever showed what you actually want.</p>
+  <p>And every day you wait, the bad habit gets practiced again. And again. <mark>Habits don't fade on their own. They get stronger.</mark></p>
+
+  <h2>Sound familiar?</h2>
+  <ul class="xlist">
+    <li>You yell "No!" ten times and nothing changes</li>
+    <li>You're embarrassed when people come over</li>
+    <li>Walks feel like a tug-of-war, not a break</li>
+    <li>Your cat shreds the sofa and ignores the $60 scratching post</li>
+    <li>You watched 40 YouTube videos and still don't know where to start</li>
+    <li>The vet visit means scratches, screaming and a carrier battle</li>
+  </ul>
+
+  <p>Here's the truth the "free tips" crowd won't tell you: <strong>random tips don't work.</strong> Training works when you follow the right steps, <em>in the right order</em>, with the right timing.</p>
+  <p>That's exactly what <strong>PawSchool</strong> gives you.</p>
+
+  <h2>Introducing PawSchool</h2>
+  <p>A complete training and care academy that lives in your browser and phone. No books. No 2-hour videos. You open a lesson, follow one step at a time, tap the rep counter, start the timer, and train.</p>
+  <p>Every lesson ends with a quick quiz so you <em>know</em> you got it, and you earn XP and badges as your pet improves. It's training that you'll actually stick with.</p>
+
+  <h2>Here's everything inside</h2>
+  <div class="modules">
+    <div class="mod"><span>Course 1 · 6 lessons</span><h3>Dog Obedience Basics</h3><p>Name recognition, Sit, Down, Stay, Come When Called, and Loose Leash Walking. The cues every dog should know.</p></div>
+    <div class="mod"><span>Course 2 · 4 lessons</span><h3>Cat Training &amp; Care</h3><p>Litter box success, scratching post training, a clicker "High Five" trick, and stress-free carrier training.</p></div>
+    <div class="mod"><span>Course 3 · 4 lessons</span><h3>Daily Care &amp; Health</h3><p>Tooth brushing, nail trims without the fight, a healthy feeding routine and a daily exercise &amp; enrichment plan.</p></div>
+    <div class="mod"><span>Course 4 · 3 lessons</span><h3>Behavior Fixes</h3><p>Stop jumping on people, calm the barking, and teach your dog to be comfortable home alone.</p></div>
+    <div class="mod"><span>Included tools</span><h3>The Trainer's Toolkit</h3><p>Built-in clicker, session timer, rep counter, daily care checklist, training log, pet profile, XP levels and 10 badges.</p></div>
+  </div>
+
+  <div class="center"><a class="cta" href="#order">Yes, I Want PawSchool, $27<small>Instant access after payment</small></a></div>
+
+  <h2>Do the math</h2>
+  <p>A private trainer commonly charges anywhere from $50 to $150 for a single hour. A group class series often runs a few hundred dollars. And when the trainer leaves, you're on your own again.</p>
+  <div style="overflow-x:auto"><table class="compare">
+    <tr><td>One private training hour (typical)</td><td>$50–$150</td></tr>
+    <tr><td>Group obedience class series (typical)</td><td>$150–$400</td></tr>
+    <tr><td>One chewed sofa or pair of shoes</td><td>$100+</td></tr>
+    <tr class="win"><td>PawSchool, lifetime access</td><td>$27</td></tr>
+  </table></div>
+  <p>That's less than a bag of premium dog food. <span class="red">And you keep it forever.</span></p>
+
+  <h2>Why it works when other things didn't</h2>
+  <ul class="xlist vlist">
+    <li><span><strong>One step at a time.</strong> You never wonder "what now?" The app tells you.</span></li>
+    <li><span><strong>5-minute sessions.</strong> Short sessions are how pets actually learn. No excuses about time.</span></li>
+    <li><span><strong>Reward-based only.</strong> No yelling, no shock collars, no fear. Your pet learns to <em>want</em> to listen.</span></li>
+    <li><span><strong>Coach notes on every step.</strong> The small details that make or break a lesson.</span></li>
+    <li><span><strong>Built-in accountability.</strong> XP, badges and a daily checklist keep you coming back.</span></li>
+  </ul>
+
+  <h2 id="order">Get started right now</h2>
+  <div class="offer">
+    <span class="pre" style="color:var(--red)">Full access, one payment</span>
+    <span class="old">Regular value: $97</span>
+    <span class="price"><sup>$</sup>27</span>
+    <ul class="xlist vlist">
+      <li>All 4 courses &amp; 16 step-by-step lessons</li>
+      <li>Interactive quizzes with instant feedback</li>
+      <li>Clicker, timer, rep counter &amp; training log</li>
+      <li>Daily care checklist, XP levels &amp; badges</li>
+      <li>Works for dogs and cats, on phone and computer</li>
+      <li>Lifetime access, no monthly fee</li>
+    </ul>
+    <a class="cta checkout" href="#order">Get Instant Access Now<small>$27 · One-time payment</small></a>
+    <p class="note">Secure checkout. Access link delivered right after payment. Protected by our 60-day money-back guarantee.</p>
+  </div>
+
+  <section class="guarantee" aria-labelledby="g-title">
+    <span class="seal"><big>60</big><small>Day money-back</small></span>
+    <div>
+      <h2 id="g-title">Our 60-Day Money-Back Guarantee</h2>
+      <p>Try PawSchool for a full 60 days. Follow the lessons, use the tools, train your pet. If you're not happy for any reason, contact our support team within 60 days of your purchase and we'll refund every cent. No questions asked.</p>
+      <p><strong>All the risk is on us.</strong> The only way you lose is by not trying. See the <a href="terms.html">Terms of Service</a> for details.</p>
+    </div>
+  </section>
+
+  <h2>Questions?</h2>
+  <div class="faq">
+    <details><summary>Is this for dogs or cats?</summary><p>Both. Dog owners get obedience and behavior courses, cat owners get a full cat course, and the health course covers both.</p></details>
+    <details><summary>My pet is older. Is it too late?</summary><p>No. Adult dogs and cats learn with the same reward-based method. It may take a few more sessions to replace old habits, and each lesson shows you how to make it easier.</p></details>
+    <details><summary>How much time do I need?</summary><p>About 5 to 15 minutes a day. Lessons are designed around short sessions because that's how pets learn best.</p></details>
+    <details><summary>Do I need special equipment?</summary><p>Treats, a leash, and your phone. The clicker and timer are built into the app.</p></details>
+    <details><summary>What if it doesn't work for me?</summary><p>You're covered by our 60-day money-back guarantee. Email our support team within 60 days of purchase and you get a full refund. Details are in our <a href="terms.html">Terms of Service</a>.</p></details>
+    <details><summary>Is this a subscription?</summary><p>No. You pay $27 once and keep access. There's nothing to cancel. To stop marketing emails, see the unsubscribe steps in our <a href="privacy.html#unsubscribe">Privacy Policy</a>.</p></details>
+  </div>
+</main>
+
+<section class="final"><div class="col">
+  <h2>Two choices.</h2>
+  <p>Keep doing what you're doing and get the same pulling, barking and jumping tomorrow. Or spend $27 and 5 minutes today to finally start fixing it.</p>
+  <a class="cta checkout" href="#order">I'm In, Give Me Access<small>$27 · Lifetime access · 60-day guarantee</small></a>
+  <p class="ps"><strong>P.S.</strong> Every day the bad habit gets practiced, it gets harder to break. The best day to start was when you got your pet. The second best day is today.</p>
+</div></section>
+
+<footer><div class="col">
+  <nav class="legal" aria-label="Legal"><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="privacy.html#unsubscribe">Unsubscribe</a></nav>
+  <p>© 2026 PawSchool · Reward-based training for dogs and cats. This program is educational and does not replace advice from a veterinarian or certified behaviorist.</p>
+</div></footer>
+
+<script>
+// Paste your checkout link (Stripe, Hotmart, Gumroad...) here to activate the buy buttons.
+const CHECKOUT_URL = "";
+if (CHECKOUT_URL) document.querySelectorAll(".cta").forEach(a => { a.href = CHECKOUT_URL; a.target = "_blank"; a.rel = "noopener"; });
+</script>
+</html>

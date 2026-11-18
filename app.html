@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>PawSchool Academy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell — sticky top bar + bottom tab bar on phones; content column max 1080px; lesson player is a focused single column */
+:root{
+  --bg:#f3f6f2; --surface:#ffffff; --surface-2:#e7eee6; --line:#d3ddd2;
+  --fg:#16241c; --muted:#5a6b60;
+  --field:#1f5c45; --field-ink:#ffffff; --field-soft:#d8ebe1;
+  --ball:#e3e84a; --ball-ink:#1d2410;
+  --good:#2f8a4f; --warn:#c07a12; --bad:#c2412d;
+  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1713; --surface:#16211b; --surface-2:#1d2b23; --line:#2b3b31;
+  --fg:#e6efe8; --muted:#97a99d;
+  --field:#5fc596; --field-ink:#0b1a12; --field-soft:#1e3a2c;
+  --ball:#dfe45a; --ball-ink:#1d2410;
+  --good:#5cc27f; --warn:#e3a33f; --bad:#ef7a64; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1713; --surface:#16211b; --surface-2:#1d2b23; --line:#2b3b31;
+  --fg:#e6efe8; --muted:#97a99d;
+  --field:#5fc596; --field-ink:#0b1a12; --field-soft:#1e3a2c;
+  --ball:#dfe45a; --ball-ink:#1d2410;
+  --good:#5cc27f; --warn:#e3a33f; --bad:#ef7a64; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.12;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--ball);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;text-decoration:none;color:var(--fg)}
+.brand-mark{width:34px;height:34px;border-radius:50%;background:var(--ball);display:grid;place-items:center;box-shadow:inset -4px -4px 0 rgba(0,0,0,.08)}
+.nav{display:flex;gap:4px;margin-left:auto}
+.nav button{background:none;border:0;padding:8px 14px;border-radius:999px;font-weight:600;color:var(--muted)}
+.nav button[aria-current="page"]{background:var(--field);color:var(--field-ink)}
+.xp-pill{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:.82rem;background:var(--surface-2);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.tabbar{display:none}
+@media (max-width:760px){
+  .nav{display:none}
+  .xp-pill{margin-left:auto}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .tabbar button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;font-weight:600;color:var(--muted);padding:6px 0;border-radius:10px}
+  .tabbar button[aria-current="page"]{color:var(--field)}
+  .tabbar svg{width:22px;height:22px}
+  main{padding-bottom:84px}
+}
+
+main{padding-block:28px 64px}
+.view{display:flex;flex-direction:column;gap:28px}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:stretch}
+.hero-main{background:var(--field);color:var(--field-ink);border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
+.hero-main h1{font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:800;max-width:16ch}
+.hero-main p{max-width:44ch;opacity:.9}
+.hero-main .lines{position:absolute;right:-40px;bottom:-40px;width:220px;height:220px;border-radius:50%;border:2px dashed currentColor;opacity:.25}
+.hero-main .lines::after{content:"";position:absolute;inset:30px;border-radius:50%;border:2px dashed currentColor}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 20px;font-weight:700;font-size:.95rem}
+.btn-ball{background:var(--ball);color:var(--ball-ink)}
+.btn-field{background:var(--field);color:var(--field-ink)}
+.btn-ghost{background:var(--surface-2);color:var(--fg)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.pet-card .pet-head{display:flex;gap:14px;align-items:center}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--field-soft);display:grid;place-items:center;flex:none;color:var(--field)}
+.avatar svg{width:32px;height:32px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:var(--f-display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted)}
+
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.section-head h2{font-size:1.5rem}
+
+/* course grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.course{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;text-align:left}
+.course-top{display:flex;justify-content:space-between;align-items:center}
+.course-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--field-soft);color:var(--field)}
+.course-icon svg{width:26px;height:26px}
+.course h3{font-size:1.2rem}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--field);border-radius:99px;transition:width .4s}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.chip.done{background:var(--field-soft);color:var(--field)}
+
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:600;font-size:.88rem}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* lesson list */
+.lessons{display:flex;flex-direction:column;gap:8px}
+.lesson-row{display:grid;grid-template-columns:40px 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;width:100%}
+.lesson-row:hover{border-color:var(--field)}
+.lesson-num{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:.85rem;background:var(--surface-2)}
+.lesson-row.is-done .lesson-num{background:var(--field);color:var(--field-ink)}
+.lesson-row h4{font-size:1.02rem;font-family:var(--f-body);font-weight:700}
+.lesson-row p{font-size:.85rem;color:var(--muted)}
+.course-block{display:flex;flex-direction:column;gap:12px}
+.course-block h3{font-size:1.25rem;display:flex;gap:10px;align-items:center}
+
+/* lesson player */
+.player{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:860px){.player{grid-template-columns:1fr}}
+.back{background:none;border:0;padding:0;font-weight:600;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.lesson-title h1{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800}
+.meta{display:flex;gap:8px;flex-wrap:wrap}
+.stepper{display:flex;gap:6px}
+.stepper button{flex:1;height:8px;border:0;border-radius:99px;background:var(--surface-2);padding:0}
+.stepper button.on{background:var(--field)}
+.stepper button.cur{background:var(--ball)}
+.step-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.step-card .step-label{font-family:var(--f-mono);font-size:.8rem;color:var(--field)}
+.step-card h2{font-size:1.5rem}
+.step-card p{font-size:1.05rem;max-width:62ch}
+.cue{display:flex;gap:10px;align-items:flex-start;background:var(--field-soft);border-radius:12px;padding:12px 14px;font-size:.95rem}
+.cue b{color:var(--field)}
+.step-nav{display:flex;justify-content:space-between;gap:10px}
+.side{display:flex;flex-direction:column;gap:16px}
+.side h3{font-size:1.05rem}
+ul.clean{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+ul.clean li{display:flex;gap:8px;font-size:.92rem}
+ul.clean li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:.5em;background:var(--field)}
+ul.clean.warn li::before{background:var(--bad)}
+
+/* rep counter + timer */
+.reps{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reps .count{font-family:var(--f-display);font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.round{width:52px;height:52px;border-radius:50%;border:0;font-size:1.4rem;font-weight:700}
+.timer-face{font-family:var(--f-mono);font-size:2rem;text-align:center;font-variant-numeric:tabular-nums}
+.timer-ring{position:relative;width:150px;height:150px;margin:0 auto}
+.timer-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.timer-ring .timer-face{position:absolute;inset:0;display:grid;place-items:center;font-size:1.6rem}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:18px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q h3{font-size:1.1rem;font-family:var(--f-body);font-weight:700}
+.opt{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:500}
+.opt:hover:not(:disabled){border-color:var(--field)}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--surface))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.explain{font-size:.9rem;color:var(--muted)}
+.complete{background:var(--ball);color:var(--ball-ink);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.complete h2{font-size:1.6rem}
+
+/* tools */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;align-items:start}
+.clicker{width:170px;height:170px;border-radius:50%;margin:6px auto;border:0;background:var(--ball);color:var(--ball-ink);font-family:var(--f-display);font-weight:800;font-size:1.4rem;
+  box-shadow:0 8px 0 color-mix(in srgb,var(--ball) 55%,#000);transition:transform .06s,box-shadow .06s}
+.clicker:active,.clicker.pressed{transform:translateY(6px);box-shadow:0 2px 0 color-mix(in srgb,var(--ball) 55%,#000)}
+.check{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--surface-2);cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--field)}
+.check.on span{text-decoration:line-through;color:var(--muted)}
+label.field{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.88rem}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.log{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}
+.log-item{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:.9rem}
+.log-item time{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* progress */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.badge{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.badge .medal{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--muted)}
+.badge.got .medal{background:var(--ball);color:var(--ball-ink)}
+.badge:not(.got){opacity:.6}
+.badge b{font-size:.95rem}
+.badge span{font-size:.8rem;color:var(--muted)}
+.level-box{display:flex;gap:16px;align-items:center}
+.level-num{font-family:var(--f-display);font-weight:800;font-size:3rem;line-height:1;color:var(--field)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(140%);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:999px;font-weight:600;z-index:40;transition:transform .3s;max-width:calc(100% - 32px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media (max-width:760px){.toast{bottom:calc(90px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:760px){.hero{grid-template-columns:1fr}}
+.tip-card{background:var(--surface-2);border-radius:var(--r);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+.tip-card svg{flex:none;width:28px;height:28px;color:var(--field)}
+.site-foot{border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.site-foot .wrap{display:flex;gap:18px;flex-wrap:wrap;padding-block:18px}
+.site-foot a{color:var(--fg);font-weight:600}
+@media (max-width:760px){main{padding-bottom:40px}.site-foot{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="PawSchool home">
+      <span class="brand-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:#1d2410"><ellipse cx="6" cy="9" rx="2.2" ry="2.8"/><ellipse cx="10.5" cy="5.5" rx="2.2" ry="2.8"/><ellipse cx="15.5" cy="5.5" rx="2.2" ry="2.8"/><ellipse cx="19" cy="10" rx="2.1" ry="2.6"/><path d="M12.5 11c-3 0-6.5 4.2-6.5 6.8 0 2 1.6 2.7 3.3 2.7 1.5 0 2.2-.8 3.2-.8s1.8.8 3.3.8c1.7 0 3.2-.7 3.2-2.7 0-2.6-3.5-6.8-6.5-6.8z"/></svg></span>
+      PawSchool
+    </a>
+    <nav class="nav" aria-label="Main">
+      <button data-go="home">Home</button>
+      <button data-go="learn">Lessons</button>
+      <button data-go="tools">Training Tools</button>
+      <button data-go="progress">Progress</button>
+    </nav>
+    <div class="xp-pill" title="Experience points"><span id="lvlTop">Lv 1</span> · <span id="xpTop">0 XP</span></div>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<nav class="tabbar" aria-label="Main">
+  <button data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+  <button data-go="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg>Lessons</button>
+  <button data-go="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Tools</button>
+  <button data-go="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Progress</button>
+</nav>
+
+<footer class="site-foot"><div class="wrap">
+  <a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="privacy.html#unsubscribe">Unsubscribe</a><span>© 2026 PawSchool · 60-day money-back guarantee</span>
+</div></footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------------- ICONS ---------------- */
+const ICON={
+  dog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5.2C10 3.9 8.7 3 7.5 3.4 5.6 4 4 6.5 4 9c0 1.2.6 2 1.5 2.2"/><path d="M14 5.2c0-1.3 1.3-2.2 2.5-1.8C18.4 4 20 6.5 20 9c0 1.2-.6 2-1.5 2.2"/><path d="M8 14v-1.5C8 9.5 9.8 7.5 12 7.5s4 2 4 5V14"/><path d="M8 14a4 4 0 0 0 8 0"/><circle cx="10" cy="12" r=".6" fill="currentColor"/><circle cx="14" cy="12" r=".6" fill="currentColor"/><path d="M11.3 15h1.4"/></svg>',
+  cat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l3 4h8l3-4v9a7 7 0 0 1-14 0z"/><circle cx="9.5" cy="12" r=".6" fill="currentColor"/><circle cx="14.5" cy="12" r=".6" fill="currentColor"/><path d="M11 15h2l-1 1z"/><path d="M3 14h4M3 16.5l4-1M21 14h-4M21 16.5l-4-1"/></svg>',
+  heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M8 11h2l1-2 2 4 1-2h2"/></svg>',
+  wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2 8 12.7 4 8.8 9.5 8z"/></svg>',
+  medal:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="6"/><path d="M8 3l3 5M16 3l-3 5"/></svg>',
+  bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
+};
+
+/* ---------------- CONTENT ---------------- */
+const COURSES=[
+ {id:"puppy",title:"Dog Obedience Basics",species:"dog",icon:"dog",blurb:"The five cues every dog should know, built with treats, short sessions and clear timing."},
+ {id:"cat",title:"Cat Training & Care",species:"cat",icon:"cat",blurb:"Yes, cats can be trained. Litter, scratching, carriers and a clicker trick."},
+ {id:"health",title:"Daily Care & Health",species:"both",icon:"heart",blurb:"Teeth, nails, feeding and exercise routines that keep pets healthy for years."},
+ {id:"behavior",title:"Behavior Fixes",species:"dog",icon:"wrench",blurb:"Jumping, leash pulling, barking and alone-time stress, solved step by step."},
+];
+
+const LESSONS=[
+/* ---- DOG OBEDIENCE ---- */
+{id:"name",course:"puppy",title:"Name Recognition",level:"Beginner",mins:5,reps:10,
+ summary:"Teach your dog that hearing their name means: look at me, good things are coming.",
+ why:"Every other cue starts with attention. A dog that snaps to its name is easier to teach and safer outdoors.",
+ steps:[
+  {t:"Load your treats",d:"Pick a quiet room with no distractions. Hold 10 small, soft treats (pea-sized). Your dog should be a little hungry, so train before a meal.",cue:"Treats should be gone in one bite. Big chewy treats slow sessions down."},
+  {t:"Say the name once",d:"When your dog is not looking at you, say their name one time in a happy, normal voice. Do not repeat it.",cue:"Repeating the name teaches the dog it can ignore the first call."},
+  {t:"Mark and reward the glance",d:"The instant your dog's eyes meet yours, say \"Yes!\" (or click) and give a treat right away.",cue:"Timing matters most: mark within one second of the look."},
+  {t:"Add a little distance",d:"Once your dog turns 8 out of 10 times, move a few steps away or wait until they sniff something before you call.",cue:"If success drops below 8/10, go back to the easier setup."},
+  {t:"Practice in new rooms",d:"Repeat in the kitchen, backyard and hallway. Dogs do not generalize well, so each new place is a new lesson.",cue:"Keep it to 5 minutes. End while your dog is still eager."}
+ ],
+ tips:["Never use the name to scold","Use a happy, consistent tone","Practice 2–3 short sessions per day"],
+ mistakes:["Calling the name over and over","Rewarding late","Practicing only in one room"],
+ quiz:[
+  {q:"Your dog ignores the first call. What should you do?",a:["Repeat the name louder","Make the setup easier and try again","Give the treat anyway"],c:1,e:"Lower the difficulty so your dog can succeed, then build up."},
+  {q:"When should you mark with \"Yes!\"?",a:["Within one second of eye contact","After the dog sits","When the dog walks to you"],c:0,e:"Fast marking tells the dog exactly what earned the reward."}
+ ]},
+{id:"sit",course:"puppy",title:"Sit",level:"Beginner",mins:5,reps:10,
+ summary:"The classic foundation cue, taught with a food lure and faded to a hand signal.",
+ why:"Sit is a polite default: dogs who sit to say hello can't jump, and sitting at doors prevents bolting.",
+ steps:[
+  {t:"Lure the sit",d:"Hold a treat at your dog's nose. Slowly move it up and back over the head. As the nose goes up, the rear goes down.",cue:"Move the treat slowly. Too high and your dog will jump for it."},
+  {t:"Mark the moment",d:"The second the rear touches the floor, say \"Yes!\" and give the treat. Repeat 5 times.",cue:"Don't push the hips down. Let your dog figure it out."},
+  {t:"Fade the lure",d:"Do the same hand motion with an empty hand. Mark the sit and reward from your other hand or pocket.",cue:"This turns the lure into a hand signal."},
+  {t:"Add the word",d:"Say \"Sit\" once, then give the hand signal. After a few days, the word alone will start to work.",cue:"Word first, then signal. If they come at the same time, the dog ignores the word."},
+  {t:"Add duration",d:"Wait 1 second before marking, then 2, then 3. Release with \"Okay!\" so your dog learns when the sit ends.",cue:"A clear release word is what makes Stay possible later."}
+ ],
+ tips:["Practice before meals","Ask for a sit before doors, leash on and food bowl","Use a release word every time"],
+ mistakes:["Pushing on the dog's back","Saying \"Sit, sit, sit\"","Holding the treat too high"],
+ quiz:[
+  {q:"Where should the lure move to get a sit?",a:["Straight down to the floor","Up and back over the head","Out away from the dog"],c:1,e:"As the head tilts up, the rear naturally lowers."},
+  {q:"Why use a release word like \"Okay\"?",a:["To tell the dog the cue is over","To scold the dog","To start a new trick"],c:0,e:"Without a release, the dog decides when to get up."}
+ ]},
+{id:"down",course:"puppy",title:"Down",level:"Beginner",mins:7,reps:8,
+ summary:"Lying down on cue, the base for settling in cafés, vet waiting rooms and at home.",
+ why:"Down is a calm position. Dogs that can settle on cue are easier to take everywhere.",
+ steps:[
+  {t:"Start from a sit",d:"Ask for a sit. Hold a treat at your dog's nose.",cue:"A non-slip surface like a rug makes this easier."},
+  {t:"Lure to the floor",d:"Slowly bring the treat straight down between the front paws, then slide it a little toward you along the floor.",cue:"Think of an L shape: down, then out."},
+  {t:"Mark the elbows",d:"When both elbows touch the floor, say \"Yes!\" and give the treat on the floor between the paws.",cue:"Rewarding low keeps your dog in position."},
+  {t:"Use a flat-hand signal",d:"Repeat with an empty hand, palm facing down, moving toward the floor. Reward from the other hand.",cue:"If your dog stalls, break it into smaller steps: reward head lowering first."},
+  {t:"Add the word \"Down\"",d:"Say \"Down\" once, pause, then give the hand signal. Gradually make the hand motion smaller.",cue:"Don't use \"Down\" for \"get off the couch\". Use \"Off\" for that."}
+ ],
+ tips:["Be patient, Down takes longer than Sit","Reward on the floor","Practice on soft surfaces first"],
+ mistakes:["Moving the lure too fast","Using \"Down\" for two different things","Pressing on shoulders"],
+ quiz:[
+  {q:"What does \"Down\" mean in this course?",a:["Get off the furniture","Lie down with elbows on the floor","Stop jumping"],c:1,e:"Keep one meaning per word. Use \"Off\" for furniture."},
+  {q:"Where should you deliver the reward?",a:["High above the head","On the floor between the paws","Tossed across the room"],c:1,e:"Low rewards keep the dog lying down."}
+ ]},
+{id:"stay",course:"puppy",title:"Stay",level:"Intermediate",mins:8,reps:8,
+ summary:"Build the three Ds of stay: duration, distance and distraction, one at a time.",
+ why:"Stay keeps your dog safe at open doors, at the curb, and when you drop something dangerous.",
+ steps:[
+  {t:"Duration first",d:"Ask for a sit. Say \"Stay\" with a flat palm toward the dog. Wait 2 seconds, mark, reward, then release with \"Okay!\".",cue:"Go back to your dog to reward. Don't call them to you."},
+  {t:"Grow the time",d:"Increase to 5, 10, then 20 seconds. Mix in easy short ones so it doesn't only get harder.",cue:"If your dog breaks, calmly reset and do a shorter stay."},
+  {t:"Add one step of distance",d:"Take one step back, then return immediately and reward. Build to 2, 3, 5 steps.",cue:"When you add distance, shorten the duration again."},
+  {t:"Add mild distractions",d:"Bounce on your toes, clap once, or drop a glove. Reward your dog for staying put.",cue:"Change only one D at a time."},
+  {t:"Practice real life",d:"Use Stay at the front door and before meals. Release with \"Okay!\" every time.",cue:"Always release. Never let the stay just fade out."}
+ ],
+ tips:["Change only one D at a time","Return to your dog to reward","End on an easy success"],
+ mistakes:["Calling the dog out of a stay","Increasing time and distance together","Forgetting to release"],
+ quiz:[
+  {q:"What are the three Ds of Stay?",a:["Dog, door, dinner","Duration, distance, distraction","Down, drop, done"],c:1,e:"Train each D separately before combining them."},
+  {q:"Your dog breaks a 20 second stay. Next step?",a:["Try 30 seconds","Reset and do a shorter stay","End the session angry"],c:1,e:"Make it easier so your dog can win, then build back up."}
+ ]},
+{id:"recall",course:"puppy",title:"Come When Called",level:"Intermediate",mins:10,reps:10,
+ summary:"A reliable recall is the most important safety cue. Make coming to you the best thing ever.",
+ why:"A solid recall can stop your dog from running into traffic or approaching an unfriendly dog.",
+ steps:[
+  {t:"Pick a special word",d:"Choose a fresh recall word like \"Here!\" if \"Come\" has been overused. Only use it when you can reward.",cue:"Your best treats (chicken, cheese) are reserved for recall."},
+  {t:"Start close",d:"Indoors, 2 meters away, say the word once in a cheerful voice and back away a step. Mark when your dog reaches you and reward generously.",cue:"Moving away triggers the chase instinct."},
+  {t:"Collar touch",d:"Before giving the treat, gently touch the collar. This prevents a \"drive-by\" where the dog grabs the treat and leaves.",cue:"Collar grab plus treat = no worries about being caught."},
+  {t:"Play the recall game",d:"With a partner, take turns calling the dog back and forth across the room. Each successful arrival gets a jackpot.",cue:"Keep it a game. Stop before your dog gets bored."},
+  {t:"Go outside on a long line",d:"Use a 5–10 m long line in a park. Call when your dog is mildly distracted. Never call to end fun, then sometimes release back to play.",cue:"Never call your dog to punish, bathe or leave the park every time."}
+ ],
+ tips:["Reward every recall, always","Run away from your dog to encourage chasing","Use a long line for safety"],
+ mistakes:["Calling for something unpleasant","Chasing your dog","Practicing off-leash too early"],
+ quiz:[
+  {q:"Why should you back away when calling?",a:["It looks funny","It triggers your dog to follow you","It tires you out"],c:1,e:"Dogs love to chase. Moving away pulls them toward you."},
+  {q:"Which situation will weaken your recall?",a:["Calling then giving chicken","Calling then giving a bath every time","Calling during a game"],c:1,e:"If coming means something bad happens, dogs stop coming."}
+ ]},
+{id:"leash",course:"puppy",title:"Loose Leash Walking",level:"Intermediate",mins:10,reps:15,
+ summary:"Teach your dog that a loose leash makes the walk go forward and pulling makes it stop.",
+ why:"Walks become enjoyable, safer for your shoulders and less stressful for your dog's neck.",
+ steps:[
+  {t:"Find the reward zone",d:"Indoors, with the leash on, reward your dog every time they are next to your leg. Feed right at the seam of your pants.",cue:"Pick a side (left is common) and always reward there."},
+  {t:"Take one step",d:"Take a step. If your dog stays at your side, mark and reward. Build to 2, 3, then 5 steps.",cue:"Reward frequently at first: every 1–2 steps."},
+  {t:"Be a tree",d:"Outside, the moment the leash gets tight, stop completely. Wait. When the leash loosens, mark and continue walking.",cue:"Never pull back. Just stop and wait."},
+  {t:"Change direction",d:"If your dog keeps pulling, turn and walk the other way. Reward when they catch up beside you.",cue:"This keeps your dog curious about where you're going."},
+  {t:"Give sniff breaks",d:"Every few minutes say \"Go sniff!\" and let your dog explore. Sniffing is a reward too.",cue:"A mentally satisfied dog pulls less."}
+ ],
+ tips:["Use a front-clip harness for strong pullers","Reward at your leg, not in front","Shorter, focused walks at first"],
+ mistakes:["Moving forward while the leash is tight","Yanking the leash","Expecting perfection in busy places early"],
+ quiz:[
+  {q:"The leash goes tight. What do you do?",a:["Yank it back","Stop and wait for slack","Keep walking"],c:1,e:"Forward movement only happens on a loose leash."},
+  {q:"Where should rewards be delivered?",a:["Next to your leg","In front of the dog","On the ground ahead"],c:0,e:"Rewards where you want the dog to be."}
+ ]},
+
+/* ---- CAT ---- */
+{id:"litter",course:"cat",title:"Litter Box Success",level:"Beginner",mins:5,reps:5,
+ summary:"Set up the litter box so your cat wants to use it, every time.",
+ why:"Most litter problems come from the setup, not the cat. Fix the box and you fix the habit.",
+ steps:[
+  {t:"Count your boxes",d:"Have one box per cat plus one extra. For one cat, that means two boxes in different areas.",cue:"Boxes side by side count as one big box to a cat."},
+  {t:"Pick a quiet spot",d:"Place boxes away from food, water, loud appliances and busy hallways. Cats want privacy and an escape route.",cue:"Avoid tucking boxes behind the washing machine."},
+  {t:"Choose the right litter",d:"Most cats prefer unscented, fine, clumping litter about 5 cm deep.",cue:"Change litter types slowly by mixing old and new."},
+  {t:"Scoop daily",d:"Scoop at least once a day and fully wash the box every 2–4 weeks with mild soap.",cue:"Strong cleaners can make the box smell wrong to your cat."},
+  {t:"Reward and observe",d:"Calmly praise or give a treat after your cat uses the box. Watch for changes in habits.",cue:"Sudden accidents can mean a urinary problem. Call a vet."}
+ ],
+ tips:["One box per cat plus one","Unscented clumping litter","Scoop every day"],
+ mistakes:["Box next to the food bowl","Scented liners and litter","Punishing accidents"],
+ quiz:[
+  {q:"How many litter boxes for two cats?",a:["One","Two","Three"],c:2,e:"One per cat plus one extra."},
+  {q:"Your cat suddenly pees outside the box. First step?",a:["Punish the cat","Check with a vet","Move the box outside"],c:1,e:"Medical issues are a common cause of sudden changes."}
+ ]},
+{id:"scratch",course:"cat",title:"Scratching Post Training",level:"Beginner",mins:5,reps:6,
+ summary:"Redirect scratching from your sofa to a post your cat actually likes.",
+ why:"Scratching is a natural need. You can't stop it, but you can choose where it happens.",
+ steps:[
+  {t:"Choose a good post",d:"It should be tall enough for a full stretch, heavy enough not to wobble, and covered in sisal rope.",cue:"Wobbly posts get ignored."},
+  {t:"Place it where they scratch",d:"Put the post right next to the furniture your cat is scratching, or near where they sleep.",cue:"Cats scratch after waking up to stretch."},
+  {t:"Make it fun",d:"Drag a wand toy across and up the post. When your cat's claws dig in, praise and give a treat.",cue:"A little catnip or silvervine can help."},
+  {t:"Make furniture less fun",d:"Cover favorite furniture spots temporarily with double-sided tape or a throw.",cue:"Never yell or spray water. It only teaches fear."},
+  {t:"Move it gradually",d:"Once the habit is strong, move the post a few centimeters per day to where you want it.",cue:"Keep the old spot covered for a few more weeks."}
+ ],
+ tips:["Sisal rope works best","Place posts near sleeping spots","Reward every scratch on the post"],
+ mistakes:["Short, wobbly posts","Hiding the post in a corner","Punishment"],
+ quiz:[
+  {q:"What makes a post appealing?",a:["Tall, stable and sisal","Short and soft","Wobbly so it moves"],c:0,e:"Cats need a full stretch and solid resistance."},
+  {q:"Where should the post first go?",a:["In the garage","Next to the furniture being scratched","On a high shelf"],c:1,e:"Start where the habit already exists."}
+ ]},
+{id:"catclicker",course:"cat",title:"Clicker Trick: High Five",level:"Intermediate",mins:5,reps:10,
+ summary:"Use the clicker to teach your cat a paw touch, then a high five.",
+ why:"Training builds trust, prevents boredom and makes vet handling easier.",
+ steps:[
+  {t:"Charge the clicker",d:"Click, then immediately give a tiny treat. Repeat 10 times. Your cat learns that click means food.",cue:"Use the clicker in the Tools tab. Lickable treats work great."},
+  {t:"Wait for a paw lift",d:"Hold a treat in a closed fist just above your cat's head height. When a paw lifts, click and reward.",cue:"Even a small lift counts at first."},
+  {t:"Shape the touch",d:"Click only when the paw touches your hand. Then open your palm and click only for touches on your flat palm.",cue:"Raise your criteria gradually."},
+  {t:"Add the cue",d:"Say \"High five!\" just before showing your palm. Click and reward the touch.",cue:"Cats tire fast. 2–3 minutes is a full session."},
+  {t:"Practice in short bursts",d:"Do 5 reps a few times a day. Stop if your cat walks away and try later.",cue:"Leaving is a signal, not stubbornness."}
+ ],
+ tips:["Sessions of 2–3 minutes","Tiny, tasty treats","Train before meals"],
+ mistakes:["Long sessions","Clicking without rewarding","Forcing the paw"],
+ quiz:[
+  {q:"What does \"charging\" the clicker mean?",a:["Replacing the battery","Pairing click with a treat","Clicking loudly"],c:1,e:"The click becomes meaningful once paired with food."},
+  {q:"Your cat walks away mid-session. Best move?",a:["Pick them up and continue","End and try later","Click louder"],c:1,e:"Respect their limit. Shorter is better with cats."}
+ ]},
+{id:"carrier",course:"cat",title:"Carrier Without Stress",level:"Beginner",mins:5,reps:6,
+ summary:"Turn the carrier into a cozy bed so vet trips stop being a fight.",
+ why:"Most cats only see the carrier before a vet visit. Changing that cuts stress for both of you.",
+ steps:[
+  {t:"Leave it out",d:"Keep the carrier open in a room your cat likes, with a soft blanket inside. Remove the door if possible.",cue:"The carrier becomes furniture, not a warning sign."},
+  {t:"Feed near it",d:"Place treats or meals near the carrier, then at the entrance, then inside.",cue:"Move closer over several days."},
+  {t:"Reward going in",d:"When your cat walks in on their own, click or praise and drop a treat inside.",cue:"Never push your cat in during training."},
+  {t:"Close the door briefly",d:"While your cat eats inside, close the door for 2 seconds and open it. Build up to a minute.",cue:"Open before your cat gets worried."},
+  {t:"Short car rides",d:"Lift the carrier and walk around, then take a 2-minute car ride that ends at home with treats.",cue:"Not every ride should end at the vet."}
+ ],
+ tips:["Carrier lives in the home","Use a familiar blanket","Top-loading carriers are easier"],
+ mistakes:["Getting it out only for vet visits","Forcing the cat inside","Rushing the door closing"],
+ quiz:[
+  {q:"Where should the carrier be kept?",a:["In the garage","Open in a room the cat likes","Hidden until needed"],c:1,e:"Familiar and cozy beats scary and rare."},
+  {q:"Close the door for the first time when…",a:["The cat is eating inside","The cat is hissing","Right before the vet"],c:0,e:"Pair the closed door with something good."}
+ ]},
+
+/* ---- HEALTH ---- */
+{id:"teeth",course:"health",title:"Tooth Brushing",level:"Beginner",mins:5,reps:5,
+ summary:"Build up to daily brushing in small steps your pet accepts.",
+ why:"Most dogs and cats show signs of dental disease by age 3. Brushing is the best prevention.",
+ steps:[
+  {t:"Choose pet toothpaste",d:"Use toothpaste made for pets. Human toothpaste can contain xylitol and fluoride, which are harmful.",cue:"Poultry or malt flavors are popular."},
+  {t:"Taste test",d:"Let your pet lick some toothpaste from your finger. Praise them. Do this for 2–3 days.",cue:"You're teaching that toothpaste is a treat."},
+  {t:"Touch the teeth",d:"Lift the lip and rub the outer surface of the canine teeth with your finger and paste.",cue:"Keep sessions under 30 seconds."},
+  {t:"Introduce the brush",d:"Use a finger brush or soft pet brush at a 45° angle to the gum line, small circles, outer surfaces only.",cue:"The tongue cleans the inner surfaces mostly."},
+  {t:"Build the routine",d:"Brush a few more teeth each day until you can do the whole mouth in about 1 minute.",cue:"Pick a fixed time, like after the evening walk."}
+ ],
+ tips:["Never use human toothpaste","Focus on the outer surfaces","Aim for daily, 3x/week minimum"],
+ mistakes:["Doing the whole mouth on day one","Restraining a scared pet","Skipping vet dental checks"],
+ quiz:[
+  {q:"Why not use human toothpaste?",a:["It tastes bad","It can contain xylitol and fluoride","It's too expensive"],c:1,e:"Xylitol is toxic to dogs."},
+  {q:"Which tooth surfaces matter most?",a:["Outer surfaces","Inner surfaces","Only the front teeth"],c:0,e:"Tartar builds mostly on the outer surfaces."}
+ ]},
+{id:"nails",course:"health",title:"Nail Trims at Home",level:"Intermediate",mins:8,reps:6,
+ summary:"Desensitize paws and trim nails safely without fear.",
+ why:"Long nails change how pets walk and can cause joint pain. Regular trims keep paws healthy.",
+ steps:[
+  {t:"Handle paws daily",d:"Touch a paw for 1 second, then treat. Build to holding the paw and gently pressing each toe.",cue:"Do this for a week before using clippers."},
+  {t:"Meet the clipper",d:"Show the clipper, then treat. Touch it to a nail, then treat. Make the clipping sound near the paw, then treat.",cue:"Every new step gets paired with food."},
+  {t:"Find the quick",d:"On light nails, the pink quick is visible. On dark nails, trim tiny slivers and stop when you see a dark dot in the center.",cue:"Keep styptic powder nearby just in case."},
+  {t:"Trim one nail",d:"Clip just the tip of one nail. Give a jackpot of treats. Stop for the day.",cue:"One nail per day is a perfectly good plan."},
+  {t:"Keep a schedule",d:"Trim every 2–4 weeks. If you hear nails clicking on the floor, they're too long.",cue:"Log trims in the Training Log to remember."}
+ ],
+ tips:["One nail at a time is fine","Sharp clippers cut cleanly","Styptic powder stops bleeding"],
+ mistakes:["Cutting too much at once","Restraining a panicking pet","Waiting months between trims"],
+ quiz:[
+  {q:"What is the quick?",a:["The hard tip of the nail","The blood vessel inside the nail","A type of clipper"],c:1,e:"Cutting the quick hurts and bleeds."},
+  {q:"A sign nails are too long:",a:["Clicking on the floor","A shiny coat","Your pet sleeps more"],c:0,e:"Nails shouldn't touch the floor when standing."}
+ ]},
+{id:"feeding",course:"health",title:"Feeding Routine",level:"Beginner",mins:5,reps:3,
+ summary:"Set meal times, portions and food rules that support healthy weight.",
+ why:"Over half of pets are overweight. A clear routine prevents weight gain and begging.",
+ steps:[
+  {t:"Check the right amount",d:"Use the feeding guide on the package as a start, then adjust with your vet based on body condition.",cue:"Measure food with a cup or scale, not by eye."},
+  {t:"Set fixed meal times",d:"Adult dogs: 2 meals a day. Puppies: 3–4. Cats do well with several small meals.",cue:"Pick up dog food after 15–20 minutes."},
+  {t:"Count treats",d:"Treats should be under 10% of daily calories. Use part of the meal as training rewards.",cue:"Training kibble from the daily portion = zero extra calories."},
+  {t:"Use puzzle feeders",d:"Feed part of each meal from a puzzle toy or snuffle mat to slow eating and add mental work.",cue:"Great for fast eaters and bored pets."},
+  {t:"Know toxic foods",d:"Never give chocolate, grapes, raisins, onions, garlic, xylitol or cooked bones. Lilies are deadly to cats.",cue:"Save your vet's emergency number in your phone."}
+ ],
+ tips:["Measure every meal","Treats under 10% of calories","Fresh water always"],
+ mistakes:["Free-feeding dogs","Feeding table scraps","Guessing portions"],
+ quiz:[
+  {q:"Treats should be what share of daily calories?",a:["Under 10%","About 30%","Half"],c:0,e:"More than that unbalances the diet."},
+  {q:"Which is toxic to dogs?",a:["Carrots","Grapes","Plain rice"],c:1,e:"Grapes and raisins can cause kidney failure."}
+ ]},
+{id:"enrich",course:"health",title:"Exercise & Enrichment",level:"Beginner",mins:15,reps:4,
+ summary:"Tire your pet's body and brain with a balanced daily plan.",
+ why:"A bored pet invents its own jobs, like chewing shoes. Enrichment prevents problems before they start.",
+ steps:[
+  {t:"Daily physical exercise",d:"Most dogs need 30–90 minutes a day depending on breed and age. Cats need 2–3 play sessions of 10–15 minutes.",cue:"Puppies: about 5 minutes per month of age, twice a day."},
+  {t:"Sniff walks",d:"Let your dog sniff freely on at least one walk. 20 minutes of sniffing can tire a dog as much as a long run.",cue:"The nose is a dog's biggest brain workout."},
+  {t:"Hunting play for cats",d:"Move a wand toy like prey: hide, dart, pause. End with a catch, then a meal.",cue:"Hunt, catch, eat, groom, sleep: the natural cycle."},
+  {t:"Food puzzles",d:"Stuff a rubber toy with wet food and freeze it, or scatter kibble in a towel to unroll.",cue:"Start easy so your pet doesn't give up."},
+  {t:"Rotate toys",d:"Keep only 3–4 toys out. Swap them weekly so old toys feel new.",cue:"Novelty is a big part of play."}
+ ],
+ tips:["Mix body and brain work","End cat play with a catch","Rotate toys weekly"],
+ mistakes:["Only one short walk a day","Laser pointers with no catch","Leaving all toys out"],
+ quiz:[
+  {q:"Why end cat play with a catch?",a:["It satisfies the hunt cycle","Cats get angry otherwise","It's faster"],c:0,e:"Without a catch, play can leave cats frustrated."},
+  {q:"A great low-impact way to tire a dog:",a:["Sniff walks","Hours of fetch","Watching TV"],c:0,e:"Sniffing is intense mental work."}
+ ]},
+
+/* ---- BEHAVIOR ---- */
+{id:"jumping",course:"behavior",title:"Stop Jumping on People",level:"Intermediate",mins:8,reps:10,
+ summary:"Teach a polite greeting: four paws on the floor earns attention.",
+ why:"Jumping is a dog's way of saying hi. Teach them a better way that still gets them the attention they want.",
+ steps:[
+  {t:"Remove the reward",d:"When your dog jumps, turn away, fold your arms and say nothing. Attention of any kind, even \"No!\", rewards jumping.",cue:"Everyone in the household must do the same."},
+  {t:"Reward four on the floor",d:"The moment all paws are on the ground, calmly praise and give a treat low, near the floor.",cue:"Low treats keep the head and body down."},
+  {t:"Ask for a sit",d:"As you approach, ask for a sit before your dog can jump. Reward the sit with attention.",cue:"A sitting dog can't jump."},
+  {t:"Practice with helpers",d:"Have a friend approach. If your dog jumps, the friend turns and leaves. If your dog sits, the friend greets them.",cue:"Repeat 5–10 short approaches per session."},
+  {t:"Manage the door",d:"Use a leash or baby gate when guests arrive until the habit is solid.",cue:"Prevention stops the old habit from being practiced."}
+ ],
+ tips:["Be boring when your dog jumps","Reward calm greetings","Use a leash with guests"],
+ mistakes:["Pushing the dog off","Some people allowing jumping","Excited greetings when you get home"],
+ quiz:[
+  {q:"Why doesn't pushing the dog off work?",a:["It's touch and attention, which rewards jumping","It's too gentle","Dogs can't feel it"],c:0,e:"Any attention can reinforce the behavior."},
+  {q:"What earns greetings?",a:["Barking","Four paws on the floor or a sit","Jumping higher"],c:1,e:"Reward the behavior you want to see."}
+ ]},
+{id:"barking",course:"behavior",title:"Calm the Barking",level:"Intermediate",mins:10,reps:8,
+ summary:"Understand why your dog barks and teach a calm alternative.",
+ why:"Barking is communication. Solve the cause and you'll get a quieter home.",
+ steps:[
+  {t:"Find the trigger",d:"Write down when barking happens for 3 days: doorbell, passing dogs, boredom, wanting attention.",cue:"Use the Training Log to track it."},
+  {t:"Manage the view",d:"Block window views with frosted film or move furniture so your dog can't stand guard.",cue:"Less practice barking means less barking."},
+  {t:"Teach \"Thank you\"",d:"When your dog barks at a sound, say \"Thank you\" calmly and toss a treat behind you. Your dog turns away from the trigger.",cue:"You acknowledged the alert. Job done."},
+  {t:"Reward quiet",d:"Catch your dog being calm near a window or the door and quietly drop a treat.",cue:"Quiet behavior that's rewarded becomes more common."},
+  {t:"Meet the need",d:"Bored barkers need more exercise and puzzles. Attention barkers should be ignored, then rewarded when quiet.",cue:"Never yell. To a dog, it sounds like you're barking too."}
+ ],
+ tips:["Track triggers","Block views","Reward calm moments"],
+ mistakes:["Yelling","Bark collars that punish","Ignoring boredom"],
+ quiz:[
+  {q:"Why shouldn't you yell at a barking dog?",a:["It sounds like you're joining in","It's too quiet","Dogs like yelling"],c:0,e:"Yelling often increases excitement."},
+  {q:"First step to fix barking:",a:["Buy a bark collar","Find the trigger","Move house"],c:1,e:"The cause decides the solution."}
+ ]},
+{id:"alone",course:"behavior",title:"Comfortable Home Alone",level:"Advanced",mins:15,reps:6,
+ summary:"Gradually teach your dog that being alone is safe and boring.",
+ why:"Dogs are social. Learning to be alone in small steps prevents panic, destruction and howling.",
+ steps:[
+  {t:"Make a safe zone",d:"Set up a cozy spot with a bed, water, and a long-lasting chew. Use it during calm times too.",cue:"Classical music or white noise can help mask outside sounds."},
+  {t:"Desensitize departure cues",d:"Pick up keys, put on shoes or a coat, then sit back down. Repeat many times a day until your dog stops reacting.",cue:"Keys should become meaningless."},
+  {t:"Tiny absences",d:"Step out the door for 5 seconds and return calmly. Build to 30 seconds, 1 minute, 5 minutes.",cue:"Come back before your dog becomes stressed."},
+  {t:"Calm arrivals and exits",d:"Leave and return without a big goodbye or greeting. Wait for calm before saying hello.",cue:"Drama makes departures a big deal."},
+  {t:"Record and review",d:"Film your dog with a phone or pet camera. Whining, pacing or scratching at the door means you've gone too far, too fast.",cue:"Severe cases need a vet or certified behaviorist."}
+ ],
+ tips:["Progress slowly","Stay under the stress threshold","Consider a behaviorist for severe cases"],
+ mistakes:["Long absences too soon","Emotional goodbyes","Punishing destruction afterward"],
+ quiz:[
+  {q:"Your dog starts pacing at 3 minutes alone. Next session?",a:["Try 10 minutes","Go back to a shorter time","Leave all day"],c:1,e:"Stay under the threshold and build slowly."},
+  {q:"How should you leave the house?",a:["Long emotional goodbye","Calm and low-key","Sneak out after yelling"],c:1,e:"Low-key exits make leaving feel normal."}
+ ]},
+];
+
+const BADGES=[
+ {id:"first",t:"First Lesson",d:"Finish any lesson",test:s=>doneCount(s)>=1},
+ {id:"three",t:"On a Roll",d:"Finish 3 lessons",test:s=>doneCount(s)>=3},
+ {id:"puppy",t:"Good Dog",d:"Finish Dog Obedience Basics",test:s=>courseDone(s,"puppy")},
+ {id:"cat",t:"Cat Whisperer",d:"Finish Cat Training & Care",test:s=>courseDone(s,"cat")},
+ {id:"health",t:"Health Hero",d:"Finish Daily Care & Health",test:s=>courseDone(s,"health")},
+ {id:"behavior",t:"Problem Solver",d:"Finish Behavior Fixes",test:s=>courseDone(s,"behavior")},
+ {id:"quiz",t:"Sharp Mind",d:"Get 5 perfect quizzes",test:s=>(s.perfect||0)>=5},
+ {id:"click",t:"Click Master",d:"Use the clicker 50 times",test:s=>(s.clicks||0)>=50},
+ {id:"care",t:"Daily Carer",d:"Complete the full daily checklist",test:s=>(s.fullCareDays||0)>=1},
+ {id:"all",t:"PawSchool Graduate",d:"Finish every lesson",test:s=>doneCount(s)>=LESSONS.length},
+];
+
+const CARE=["Fresh water","Breakfast","Dinner","Walk or play session","5-minute training","Brushing / grooming","Check eyes, ears & paws","Cuddle time"];
+
+/* ---------------- STATE ---------------- */
+const KEY="pawschool-v1";
+const today=()=>new Date().toISOString().slice(0,10);
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.done)return s}catch(e){}
+  return {pet:{name:"Biscuit",species:"dog",age:"8 months"},done:{},xp:0,perfect:0,clicks:0,care:{day:today(),items:[]},fullCareDays:0,log:[
+    {t:"Sit practice, 10 reps, 9 successful (example)",at:Date.now()-86400000},
+    {t:"Short sniff walk, 25 min (example)",at:Date.now()-2*86400000}],badges:[]}}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+if(S.care.day!==today()){S.care={day:today(),items:[]}}
+const doneCount=s=>Object.keys(s.done).length;
+const courseDone=(s,c)=>LESSONS.filter(l=>l.course===c).every(l=>s.done[l.id]);
+const level=xp=>Math.floor(xp/100)+1;
+const courseLessons=c=>LESSONS.filter(l=>l.course===c);
+const coursePct=c=>{const ls=courseLessons(c);return Math.round(ls.filter(l=>S.done[l.id]).length/ls.length*100)};
+
+function addXP(n,msg){S.xp+=n;checkBadges();save();updateTop();if(msg)toast(msg)}
+function checkBadges(){BADGES.forEach(b=>{if(!S.badges.includes(b.id)&&b.test(S)){S.badges.push(b.id);setTimeout(()=>toast("Badge unlocked: "+b.t),900)}})}
+function updateTop(){document.getElementById("xpTop").textContent=S.xp+" XP";document.getElementById("lvlTop").textContent="Lv "+level(S.xp)}
+let tt;function toast(m){const el=document.getElementById("toast");el.textContent=m;el.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),2400)}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------------- AUDIO ---------------- */
+let actx;function click(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=actx.currentTime;[0,0.012].forEach((d,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type="square";o.frequency.value=i?2400:3200;
+  g.gain.setValueAtTime(.25,t+d);g.gain.exponentialRampToValueAtTime(.001,t+d+.03);o.connect(g).connect(actx.destination);o.start(t+d);o.stop(t+d+.04)})}catch(e){}}
+function chime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
+  [660,880,990].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;g.gain.setValueAtTime(.18,t+i*.15);g.gain.exponentialRampToValueAtTime(.001,t+i*.15+.4);o.connect(g).connect(actx.destination);o.start(t+i*.15);o.stop(t+i*.15+.45)})}catch(e){}}
+
+/* ---------------- ROUTER ---------------- */
+const app=document.getElementById("app");
+let timers=[];function clearTimers(){timers.forEach(clearInterval);timers=[]}
+function go(h){if(location.hash==="#"+h)render();else location.hash=h}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+window.addEventListener("hashchange",render);
+function render(){clearTimers();const h=(location.hash||"#home").slice(1);
+  let tab=h.startsWith("lesson-")?"learn":h;if(!["home","learn","tools","progress"].includes(tab))tab="home";
+  document.querySelectorAll("[data-go]").forEach(b=>{if(b.dataset.go===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  if(h.startsWith("lesson-")){const l=LESSONS.find(x=>"lesson-"+x.id===h);if(l)return renderLesson(l)}
+  ({home:renderHome,learn:renderLearn,tools:renderTools,progress:renderProgress})[tab]();window.scrollTo(0,0)}
+
+/* ---------------- HOME ---------------- */
+function nextLesson(){const sp=S.pet.species;return LESSONS.find(l=>!S.done[l.id]&&(sp==="cat"?["cat","health"].includes(l.course):l.course!=="cat"))||LESSONS.find(l=>!S.done[l.id])}
+const TIPS=["Keep sessions to 5 minutes. Three short sessions beat one long one.","Reward within one second. Late rewards teach the wrong thing.","End every session on a success, even an easy one.","Train before meals when your pet is a little hungry.","Change one thing at a time: place, distance or duration."];
+function renderHome(){const n=nextLesson();const careDone=S.care.items.length;
+ app.innerHTML=`<div class="view">
+ <section class="hero">
+  <div class="hero-main">
+   <span class="eyebrow" style="color:inherit;opacity:.8">Today's training</span>
+   <h1>${n?`Next up for ${esc(S.pet.name)}: ${esc(n.title)}`:`${esc(S.pet.name)} finished every lesson!`}</h1>
+   <p>${n?esc(n.summary):"Revisit any lesson to keep skills sharp, or keep logging daily care."}</p>
+   <div class="row">${n?`<button class="btn btn-ball" id="startNext">Start lesson · ${n.mins} min</button>`:""}<button class="btn btn-ghost" data-nav="learn">Browse all lessons</button></div>
+   <div class="lines" aria-hidden="true"></div>
+  </div>
+  <div class="panel pet-card">
+   <div class="pet-head"><div class="avatar">${ICON[S.pet.species==="cat"?"cat":"dog"]}</div>
+    <div><h3 style="font-size:1.3rem">${esc(S.pet.name)}</h3><p class="muted" style="font-size:.9rem">${S.pet.species==="cat"?"Cat":"Dog"} · ${esc(S.pet.age)}</p></div>
+    <button class="btn btn-ghost" style="margin-left:auto;padding:8px 12px;font-size:.85rem" data-nav="tools">Edit</button></div>
+   <div class="stats">
+    <div class="stat"><b>${doneCount(S)}</b><span>of ${LESSONS.length} lessons</span></div>
+    <div class="stat"><b>${level(S.xp)}</b><span>level</span></div>
+    <div class="stat"><b>${careDone}/${CARE.length}</b><span>care today</span></div>
+   </div>
+   <div class="bar" aria-label="Level progress"><i style="width:${S.xp%100}%"></i></div>
+   <p class="muted" style="font-size:.82rem">${100-S.xp%100} XP to level ${level(S.xp)+1}</p>
+  </div>
+ </section>
+ <div class="tip-card">${ICON.bulb}<div><span class="eyebrow">Trainer tip</span><p>${TIPS[new Date().getDate()%TIPS.length]}</p></div></div>
+ <section class="view" style="gap:16px">
+  <div class="section-head"><h2>Courses</h2><span class="muted">${LESSONS.length} lessons · ${LESSONS.reduce((a,l)=>a+l.steps.length,0)} guided steps</span></div>
+  <div class="grid">${COURSES.map(courseCard).join("")}</div>
+ </section></div>`;
+ const sn=document.getElementById("startNext");if(sn)sn.onclick=()=>go("lesson-"+n.id);
+ bindNav();}
+function courseCard(c){const p=coursePct(c.id),ls=courseLessons(c.id);
+ return `<button class="course" data-course="${c.id}">
+  <div class="course-top"><span class="course-icon">${ICON[c.icon]}</span><span class="chip ${p===100?"done":""}">${p===100?"Complete":ls.length+" lessons"}</span></div>
+  <h3>${c.title}</h3><p class="muted" style="font-size:.92rem">${c.blurb}</p>
+  <div class="bar"><i style="width:${p}%"></i></div><span class="muted" style="font-size:.8rem">${p}% complete</span></button>`}
+function bindNav(){app.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>go(b.dataset.nav));
+ app.querySelectorAll("[data-course]").forEach(b=>b.onclick=()=>{filter=b.dataset.course;go("learn")});
+ app.querySelectorAll("[data-lesson]").forEach(b=>b.onclick=()=>go("lesson-"+b.dataset.lesson))}
+
+/* ---------------- LEARN ---------------- */
+let filter="all";
+function renderLearn(){
+ const fl=[["all","All"],["puppy","Dogs"],["cat","Cats"],["health","Health"],["behavior","Behavior"]];
+ const cs=COURSES.filter(c=>filter==="all"||c.id===filter);
+ app.innerHTML=`<div class="view">
+  <div class="section-head"><div><span class="eyebrow">Lesson library</span><h1 style="font-size:2rem">Step-by-step lessons</h1></div></div>
+  <div class="filters" role="group" aria-label="Filter courses">${fl.map(([k,v])=>`<button aria-pressed="${filter===k}" data-f="${k}">${v}</button>`).join("")}</div>
+  ${cs.map(c=>`<section class="course-block"><h3><span class="course-icon" style="width:36px;height:36px">${ICON[c.icon]}</span>${c.title}<span class="chip" style="margin-left:auto">${coursePct(c.id)}%</span></h3>
+   <div class="lessons">${courseLessons(c.id).map((l,i)=>`<button class="lesson-row ${S.done[l.id]?"is-done":""}" data-lesson="${l.id}">
+    <span class="lesson-num">${S.done[l.id]?"✓":String(i+1).padStart(2,"0")}</span>
+    <div style="min-width:0"><h4>${l.title}</h4><p>${l.summary}</p></div>
+    <span class="chip">${l.level} · ${l.mins}m</span></button>`).join("")}</div></section>`).join("")}
+ </div>`;
+ app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{filter=b.dataset.f;renderLearn()});bindNav()}
+
+/* ---------------- LESSON PLAYER ---------------- */
+function renderLesson(l){let step=0,reps=0,phase="steps";const course=COURSES.find(c=>c.id===l.course);
+ let secs=l.mins*60,left=secs,running=false;
+ function draw(){
+  const total=l.steps.length;
+  let body="";
+  if(phase==="steps"){const s=l.steps[step];
+   body=`<div class="step-card">
+    <span class="step-label">STEP ${step+1} OF ${total}</span><h2>${s.t}</h2><p>${s.d}</p>
+    <div class="cue"><span style="flex:none;color:var(--field)">${ICON.bulb.replace('<svg','<svg width="20" height="20"')}</span><span><b>Coach note:</b> ${s.cue}</span></div>
+    <div class="step-nav"><button class="btn btn-ghost" id="prev" ${step===0?"disabled":""}>Back</button>
+    <button class="btn btn-field" id="next">${step===total-1?"Take the quiz":"Next step"}</button></div></div>`}
+  else if(phase==="quiz"){body=`<div class="step-card quiz"><span class="step-label">QUICK CHECK</span><h2>Lesson quiz</h2>
+   ${l.quiz.map((q,qi)=>`<div class="q" data-q="${qi}"><h3>${qi+1}. ${q.q}</h3>${q.a.map((a,ai)=>`<button class="opt" data-a="${ai}">${a}</button>`).join("")}<p class="explain" hidden></p></div>`).join("")}
+   <button class="btn btn-field" id="finish" disabled>Finish lesson</button></div>`}
+  else{body=`<div class="complete"><span class="eyebrow" style="color:inherit">Lesson complete</span><h2>Great work with ${esc(S.pet.name)}!</h2>
+   <p>${S.done[l.id]?.perfect?"Perfect quiz score. ":""}Practice this lesson for a few days before moving on. Skills need repetition in new places.</p>
+   <div class="row"><button class="btn btn-field" id="nextL">Next lesson</button><button class="btn btn-ghost" style="background:rgba(0,0,0,.08);color:inherit" id="again">Review steps</button></div></div>`}
+
+  app.innerHTML=`<div class="view">
+  <button class="back" id="back">← ${course.title}</button>
+  <div class="lesson-title" style="display:flex;flex-direction:column;gap:10px">
+   <h1>${l.title}</h1><p class="muted" style="max-width:62ch">${l.summary}</p>
+   <div class="meta"><span class="chip">${l.level}</span><span class="chip">${l.mins} min session</span><span class="chip">${l.steps.length} steps</span>${S.done[l.id]?'<span class="chip done">Completed</span>':""}</div>
+  </div>
+  <div class="stepper" aria-label="Lesson steps">${l.steps.map((_,i)=>`<button aria-label="Go to step ${i+1}" data-s="${i}" class="${phase!=="steps"||i<step?"on":i===step?"cur":""}"></button>`).join("")}<button aria-label="Quiz" data-s="q" class="${phase==="done"?"on":phase==="quiz"?"cur":""}"></button></div>
+  <div class="player">
+   <div style="display:flex;flex-direction:column;gap:16px;min-width:0">${body}
+    <div class="panel"><h3 style="font-size:1.05rem">Why it matters</h3><p class="muted">${l.why}</p></div></div>
+   <aside class="side">
+    <div class="panel"><h3>Rep counter</h3><p class="muted" style="font-size:.85rem">Tap + for each successful rep. Goal: ${l.reps}.</p>
+     <div class="reps"><button class="round btn-ghost" id="rm" aria-label="Remove rep">−</button><span class="count" id="repc">${reps}</span><button class="round btn-ball" id="rp" aria-label="Add rep">+</button></div>
+     <div class="bar"><i id="repbar" style="width:${Math.min(100,reps/l.reps*100)}%"></i></div></div>
+    <div class="panel"><h3>Session timer</h3>
+     <div class="timer-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--surface-2)" stroke-width="8"/><circle id="ring" cx="50" cy="50" r="44" fill="none" stroke="var(--field)" stroke-width="8" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="${276.5*(1-left/secs)}"/></svg><div class="timer-face" id="tface">${fmt(left)}</div></div>
+     <div class="row" style="justify-content:center"><button class="btn btn-field" id="tgo">${running?"Pause":"Start"}</button><button class="btn btn-ghost" id="treset">Reset</button></div></div>
+    <div class="panel"><h3>Tips</h3><ul class="clean">${l.tips.map(t=>`<li>${t}</li>`).join("")}</ul>
+     <h3>Common mistakes</h3><ul class="clean warn">${l.mistakes.map(t=>`<li>${t}</li>`).join("")}</ul></div>
+   </aside></div></div>`;
+  bind()}
+ function bind(){
+  app.querySelector("#back").onclick=()=>{filter=l.course;go("learn")};
+  app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{if(b.dataset.s==="q")phase="quiz";else{phase="steps";step=+b.dataset.s}draw()});
+  const pv=app.querySelector("#prev"),nx=app.querySelector("#next");
+  if(pv)pv.onclick=()=>{step--;draw()};
+  if(nx)nx.onclick=()=>{if(step<l.steps.length-1)step++;else phase="quiz";draw();window.scrollTo({top:0,behavior:"smooth"})};
+  app.querySelector("#rp").onclick=()=>{reps++;click();updReps();if(reps===l.reps){toast("Rep goal reached! +5 XP");addXP(5)}};
+  app.querySelector("#rm").onclick=()=>{reps=Math.max(0,reps-1);updReps()};
+  app.querySelector("#tgo").onclick=e=>{running=!running;e.target.textContent=running?"Pause":"Start";
+   if(running){const iv=setInterval(()=>{if(!running){clearInterval(iv);return}left--;updTimer();if(left<=0){running=false;clearInterval(iv);chime();toast("Session done. Nice work!");app.querySelector("#tgo").textContent="Start";left=secs}},1000);timers.push(iv)}};
+  app.querySelector("#treset").onclick=()=>{running=false;left=secs;updTimer();app.querySelector("#tgo").textContent="Start"};
+  if(phase==="quiz"){let answered=0,correct=0;
+   app.querySelectorAll(".q").forEach(qe=>{const q=l.quiz[+qe.dataset.q];
+    qe.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{const a=+o.dataset.a;qe.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(+x.dataset.a===q.c)x.classList.add("right")});
+     if(a!==q.c)o.classList.add("wrong");else correct++;answered++;const ex=qe.querySelector(".explain");ex.hidden=false;ex.textContent=(a===q.c?"Correct. ":"Not quite. ")+q.e;
+     if(answered===l.quiz.length){const f=app.querySelector("#finish");f.disabled=false;f.onclick=()=>finish(correct===l.quiz.length)}})})}
+  const nl=app.querySelector("#nextL");if(nl)nl.onclick=()=>{const i=LESSONS.indexOf(l);go("lesson-"+LESSONS[(i+1)%LESSONS.length].id)};
+  const ag=app.querySelector("#again");if(ag)ag.onclick=()=>{phase="steps";step=0;draw()};
+ }
+ function finish(perfect){const first=!S.done[l.id];
+  S.done[l.id]={at:Date.now(),perfect};if(perfect)S.perfect=(S.perfect||0)+1;
+  S.log.unshift({t:`Completed lesson: ${l.title}${perfect?" (perfect quiz)":""}`,at:Date.now()});
+  chime();addXP(first?(perfect?60:40):10,first?`Lesson complete! +${perfect?60:40} XP`:"Reviewed! +10 XP");phase="done";draw();window.scrollTo({top:0,behavior:"smooth"})}
+ function updReps(){app.querySelector("#repc").textContent=reps;app.querySelector("#repbar").style.width=Math.min(100,reps/l.reps*100)+"%"}
+ function updTimer(){const f=app.querySelector("#tface");if(!f)return;f.textContent=fmt(left);app.querySelector("#ring").setAttribute("stroke-dashoffset",276.5*(1-left/secs))}
+ draw();window.scrollTo(0,0)}
+const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+
+/* ---------------- TOOLS ---------------- */
+function renderTools(){
+ app.innerHTML=`<div class="view">
+  <div><span class="eyebrow">Training toolkit</span><h1 style="font-size:2rem">Tools for every session</h1></div>
+  <div class="tools">
+   <div class="panel" style="text-align:center"><h3 style="font-size:1.2rem">Clicker</h3><p class="muted" style="font-size:.9rem">Click the exact moment your pet does it right, then treat. Spacebar works too.</p>
+    <button class="clicker" id="clk" aria-label="Click">CLICK</button><p class="muted" style="font-family:var(--f-mono);font-size:.85rem">Total clicks: <span id="clkn">${S.clicks||0}</span></p></div>
+
+   <div class="panel"><h3 style="font-size:1.2rem">Daily care checklist</h3><p class="muted" style="font-size:.9rem">Resets every day · ${new Date().toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}</p>
+    <div style="display:flex;flex-direction:column;gap:8px" id="care">${CARE.map((c,i)=>`<label class="check ${S.care.items.includes(i)?"on":""}"><input type="checkbox" id="care${i}" data-c="${i}" ${S.care.items.includes(i)?"checked":""}><span>${c}</span></label>`).join("")}</div>
+    <div class="bar"><i id="carebar" style="width:${S.care.items.length/CARE.length*100}%"></i></div></div>
+
+   <div class="panel"><h3 style="font-size:1.2rem">Pet profile</h3>
+    <label class="field">Name<input type="text" id="pn" value="${esc(S.pet.name)}" maxlength="24"></label>
+    <div class="two"><label class="field">Species<select id="ps"><option value="dog" ${S.pet.species==="dog"?"selected":""}>Dog</option><option value="cat" ${S.pet.species==="cat"?"selected":""}>Cat</option></select></label>
+    <label class="field">Age<input type="text" id="pa" value="${esc(S.pet.age)}" maxlength="20"></label></div>
+    <button class="btn btn-field" id="psave">Save profile</button></div>
+
+   <div class="panel"><h3 style="font-size:1.2rem">Training log</h3>
+    <form id="logf" class="row" style="flex-wrap:nowrap"><input type="text" id="logt" placeholder="e.g. Recall in the park, 8/10" aria-label="Log entry"><button class="btn btn-ball" type="submit">Add</button></form>
+    <div class="log" id="logl"></div></div>
+  </div></div>`;
+ const clk=app.querySelector("#clk"),n=app.querySelector("#clkn");
+ const doClick=()=>{click();S.clicks=(S.clicks||0)+1;n.textContent=S.clicks;if(S.clicks===50)checkBadges();save();clk.classList.add("pressed");setTimeout(()=>clk.classList.remove("pressed"),80)};
+ clk.onclick=doClick;
+ const kh=e=>{if(e.code==="Space"&&location.hash==="#tools"&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)){e.preventDefault();doClick()}};
+ document.onkeydown=kh;
+ app.querySelectorAll("[data-c]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.c;
+  if(cb.checked){if(!S.care.items.includes(i))S.care.items.push(i)}else S.care.items=S.care.items.filter(x=>x!==i);
+  cb.parentElement.classList.toggle("on",cb.checked);app.querySelector("#carebar").style.width=S.care.items.length/CARE.length*100+"%";
+  if(S.care.items.length===CARE.length&&S.care.full!==S.care.day){S.care.full=S.care.day;S.fullCareDays=(S.fullCareDays||0)+1;chime();addXP(20,"Full care day! +20 XP")}else save()});
+ app.querySelector("#psave").onclick=()=>{S.pet={name:app.querySelector("#pn").value.trim()||"My pet",species:app.querySelector("#ps").value,age:app.querySelector("#pa").value.trim()||"—"};save();toast("Profile saved")};
+ const drawLog=()=>{app.querySelector("#logl").innerHTML=S.log.length?S.log.slice(0,40).map(x=>`<div class="log-item"><span>${esc(x.t)}</span><time>${new Date(x.at).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</time></div>`).join(""):'<p class="muted">No entries yet. Log your first session above.</p>'};
+ drawLog();
+ app.querySelector("#logf").onsubmit=e=>{e.preventDefault();const v=app.querySelector("#logt").value.trim();if(!v)return;S.log.unshift({t:v,at:Date.now()});app.querySelector("#logt").value="";drawLog();addXP(5,"Session logged · +5 XP")};
+}
+
+/* ---------------- PROGRESS ---------------- */
+function renderProgress(){const lv=level(S.xp);
+ app.innerHTML=`<div class="view">
+  <div><span class="eyebrow">Progress</span><h1 style="font-size:2rem">${esc(S.pet.name)}'s report card</h1></div>
+  <div class="panel level-box"><span class="level-num">${lv}</span><div style="flex:1;display:flex;flex-direction:column;gap:6px"><b>Level ${lv} trainer · ${S.xp} XP</b><div class="bar"><i style="width:${S.xp%100}%"></i></div><span class="muted" style="font-size:.85rem">${100-S.xp%100} XP to level ${lv+1}</span></div></div>
+  <div class="grid">${COURSES.map(c=>{const ls=courseLessons(c.id);return `<div class="panel"><div class="row"><span class="course-icon">${ICON[c.icon]}</span><h3 style="font-size:1.1rem">${c.title}</h3></div>
+   <ul class="clean">${ls.map(l=>`<li style="justify-content:space-between"><span>${l.title}</span><span class="chip ${S.done[l.id]?"done":""}">${S.done[l.id]?"Done":"To do"}</span></li>`).join("")}</ul></div>`}).join("")}</div>
+  <section class="view" style="gap:14px"><h2 style="font-size:1.5rem">Badges · ${S.badges.length}/${BADGES.length}</h2>
+  <div class="badges">${BADGES.map(b=>`<div class="badge ${S.badges.includes(b.id)?"got":""}"><span class="medal">${ICON.medal}</span><b>${b.t}</b><span>${b.d}</span></div>`).join("")}</div></section>
+  <div class="row"><button class="btn btn-ghost" id="reset">Reset all progress</button><span class="muted" id="resetMsg" style="font-size:.85rem"></span></div>
+ </div>`;
+ let armed=false;app.querySelector("#reset").onclick=e=>{if(!armed){armed=true;e.target.textContent="Tap again to confirm reset";app.querySelector("#resetMsg").textContent="This clears lessons, XP, badges and log on this device.";return}
+  try{localStorage.removeItem(KEY)}catch(x){}S=load();save();updateTop();toast("Progress reset");renderProgress()}}
+
+updateTop();render();
+</script>
+</html>
